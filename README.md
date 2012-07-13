@@ -1,8 +1,8 @@
-# Small part of hydra private office application (aka HUPO)
+# Small part of Hydra User Private Office application (aka HUPO)
 
 It hosts here for convenience only.
 
-Widget is just a specific model for interface customization. At present settings of every widget store in YML-files. But in future they can be transparently moved to DB.
+Widget is just a specific model for interface customization. At present settings of every widget are stored in YML files. But in future they can be transparently moved to DB.
 
 ### Example
 
