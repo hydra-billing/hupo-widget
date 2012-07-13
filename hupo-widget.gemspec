@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
 
   s.summary = "Hydra private office base gem"
   s.description = "Hydra private office base gem"
-  s.files = Dir["lib/**/*"] + %w(MIT-LICENSE Rakefile README.md)
+  s.files = Dir["lib/**/*"] + %w(MIT-LICENSE)
 
-  s.add_dependency('railties', '>= 3.2') # Any rails starting with 3.2
+  s.add_dependency('railties', '>= 3.2') # Any rails starting from 3.2
 
   s.require_paths = %w(lib)
 end
