@@ -1,15 +1,14 @@
 # coding: utf-8
 
 require 'active_support/hash_with_indifferent_access'
+require 'active_support/core_ext/hash/deep_merge'
+require 'delegate'
 
 module HupoWidget
-  class Configuration
+  class Configuration < SimpleDelegator
     def initialize
       load_files
-    end
-
-    def [](key)
-      @settings[key]
+      super(@settings)
     end
 
     private
@@ -17,12 +16,7 @@ module HupoWidget
     def load_files
       files = Rails.application.config.paths['config/widgets'].existent
 
-      @settings = files.inject(HashWithIndifferentAccess.new) do |s, f|
-        s.merge!(YAML.load(File.read(f)))
-        s
-      end
-
-      # TODO: Widgets must be created automatically based on content of YML-files
+      @settings = files.inject(HashWithIndifferentAccess.new) {|s, f| s.deep_merge(YAML.load(File.read(f)))}
     end
   end
 end

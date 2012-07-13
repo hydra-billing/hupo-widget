@@ -14,6 +14,8 @@ module HupoWidget
     initializer 'hupo_widget.load_all_widgets' do |app|
       # Preload all models due to inheritance hook in HupoWidget::Base
       app.config.paths['app/widgets'].existent.each {|f| require f}
+      HupoWidget::Base.create_widgets_by_config
+      HupoWidget::Base.load_all!
     end
   end
 end
