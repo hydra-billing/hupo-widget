@@ -3,6 +3,7 @@
 require 'active_support/hash_with_indifferent_access'
 require 'active_support/core_ext/hash/deep_merge'
 require 'delegate'
+require 'erb'
 
 module HupoWidget
   class Configuration < SimpleDelegator
@@ -16,7 +17,10 @@ module HupoWidget
     def load_files
       files = Rails.application.config.paths['config/widgets'].existent
 
-      @settings = files.inject(HashWithIndifferentAccess.new) {|s, f| s.deep_merge(YAML.load(File.read(f)))}
+      @settings = files.inject(HashWithIndifferentAccess.new) do |settings, file|
+        widget = YAML::load(ERB.new(IO.read(file)).result)
+        settings.deep_merge(widget)
+      end
     end
   end
 end

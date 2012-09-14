@@ -2,7 +2,7 @@
 # project in your rails apps through git.
 Gem::Specification.new do |s|
   s.name = "hupo-widget"
-  s.version = "0.1"
+  s.version = "0.1.1"
   s.authors = ["Nikita Shilnikov", "Latera LLC"]
   s.email = %w(ns@latera.ru)
   s.homepage = "http://github.com/latera/hupo-widget"

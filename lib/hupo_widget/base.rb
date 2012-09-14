@@ -36,7 +36,7 @@ module HupoWidget
 
       # Returns hash with all widget objects in hash with classes' and modules' names as keys
       def all
-        @widget_types.reject(&:abstract?).inject({}) {|res, type| res.merge(type.instances_hash)}
+        @widget_types.reject(&:abstract?).inject({}) {|res, type| res.deep_merge(type.instances_hash)}
       end
 
       def instances_hash
