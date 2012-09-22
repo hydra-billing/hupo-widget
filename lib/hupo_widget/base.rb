@@ -127,8 +127,12 @@ module HupoWidget
 
     protected
 
-    def verify_config
-      raise ConfigVerificationError, 'Configuration for widget %s with key not found' % self.class if @values.nil?
-    end
+      def verify_config
+        raise ConfigVerificationError, 'Configuration for widget %s with key not found' % self.class if @values.nil?
+      end
+
+      def current_user
+        @current_user ||= Session.find.user
+      end
   end
 end
