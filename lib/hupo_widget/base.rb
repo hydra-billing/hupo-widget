@@ -38,9 +38,7 @@ module HupoWidget
 
       # Returns hash with all widget objects in hash with classes' and modules' names as keys
       def all
-        return @all if @all
-        create_widgets_by_config
-        @all = widget_types.reject(&:abstract?).inject({}) {|res, type| res.deep_merge(type.instances_hash)}
+        @all ||= widget_types.reject(&:abstract?).inject({}) {|res, type| res.deep_merge(type.instances_hash)}
       end
 
       def instances_hash
@@ -64,13 +62,17 @@ module HupoWidget
 
       def reload
         config.reload
-        widget_types.each do |type|
+      end
+
+      def unload
+        @widget_types.try(:each) do |type|
           if type.singleton?
             type.instance_variable_set(:@singleton__instance__, nil)
           else
             type.instances = nil
           end
         end
+        @widget_types = nil
       end
 
       def singleton?

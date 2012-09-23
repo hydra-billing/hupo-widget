@@ -5,17 +5,14 @@ module HupoWidget
     end
 
     def call(env)
+      # Reload widgets parameters
       HupoWidget::Base.reload if Rails.env.development?
       # Preload widgets
       HupoWidget::Base.all
       @app.call(env)
     ensure
       HupoWidget::Base.all = nil
-      unload_types if Rails.env.development?
-    end
-
-    def unload_types
-      HupoWidget::Base.widget_types = nil
+      HupoWidget::Base.unload if Rails.env.development?
     end
   end
 end
