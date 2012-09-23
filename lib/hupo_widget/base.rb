@@ -3,22 +3,24 @@ require 'singleton'
 
 module HupoWidget
   class Base
-    class WidgetAlreadyInitialized < StandardError; end
     class NoInstanceAllowed < StandardError; end
     class UnknownWidget < StandardError; end
     class ConfigVerificationError < StandardError; end
 
-    @widget_types = []
-    @widgets
+    @widget_types = nil
 
     class << self
-      attr_accessor  :widget_types, :instances
+      attr_writer :widget_types, :all, :instances
 
-      def inherited(base)
-        # Remember all subclasses
-        Base.widget_types << base
-        base.instances = {}
-        super
+      def instances
+        @instances ||= {}
+      end
+
+      def widget_types
+        return @widget_types if @widget_types
+        @widget_types = []
+        create_widgets_by_config
+        @widget_types
       end
 
       # Creates single unique object of widget
@@ -36,7 +38,9 @@ module HupoWidget
 
       # Returns hash with all widget objects in hash with classes' and modules' names as keys
       def all
-        @widget_types.reject(&:abstract?).inject({}) {|res, type| res.deep_merge(type.instances_hash)}
+        return @all if @all
+        create_widgets_by_config
+        @all = widget_types.reject(&:abstract?).inject({}) {|res, type| res.deep_merge(type.instances_hash)}
       end
 
       def instances_hash
@@ -58,6 +62,17 @@ module HupoWidget
         @@config ||= HupoWidget::Configuration.new
       end
 
+      def reload
+        config.reload
+        widget_types.each do |type|
+          if type.singleton?
+            type.instance_variable_set(:@singleton__instance__, nil)
+          else
+            type.instances = nil
+          end
+        end
+      end
+
       def singleton?
         self < Singleton
       end
@@ -65,7 +80,7 @@ module HupoWidget
       def new(*)
         new_instance = super
         # Save new instance to hash
-        @instances[new_instance.key] = new_instance
+        instances[new_instance.key] = new_instance
       end
 
       # Creates all widgets defined in configuration file
@@ -78,8 +93,11 @@ module HupoWidget
         hash.each do |widget_type, values|
           widget_type = widget_type.camelize
           widget_type = '%s::%s' % [prefix, widget_type] if prefix != ''
+          class_name = '%sWidget' % widget_type
 
-          if (widget_class = ('%sWidget' % widget_type).safe_constantize)
+          if (widget_class = class_name.safe_constantize)
+            @widget_types << widget_class
+
             if widget_class.singleton?
               # Create a singleton object
               widget_class.instance
@@ -92,28 +110,19 @@ module HupoWidget
           end
         end
       end
-
-      def load_all!
-        @widget_types.each {|type| type.instances.each_value(&:load!)}
-      end
     end
 
     attr_reader :key
     delegate :singleton?, :abstract?, :config_paths, to: 'self.class'
-    delegate :as_json, to: '@values'
+    delegate :as_json, to: :@values
     delegate :config, to: 'HupoWidget::Base'
 
     def initialize(key = nil)
-      raise ArgumentError, 'Widget with key %s already exists' if self.class.instances.has_key?(key)
       raise NoInstanceAllowed, 'Could not create an instance of abstract class' if abstract?
 
       @key = singleton? ? 'singleton' : key
-    end
 
-    def load!
-      raise WidgetAlreadyInitialized if defined?(@values) && !@values.nil?
-
-      type_config = config_paths.inject(config) {|c, key| c[key]}
+      type_config = config_paths.inject(config) {|c, k| c[k]}
       @values = singleton? ? type_config : type_config[@key]
     end
 

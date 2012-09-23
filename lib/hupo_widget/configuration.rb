@@ -8,19 +8,18 @@ require 'erb'
 module HupoWidget
   class Configuration < SimpleDelegator
     def initialize
-      load_files
-      super(@settings)
+      reload
     end
 
-    private
-
-    def load_files
+    def reload
       files = Rails.application.config.paths['config/widgets'].existent
 
       @settings = files.inject(HashWithIndifferentAccess.new) do |settings, file|
         widget = YAML::load(ERB.new(IO.read(file)).result)
         settings.deep_merge(widget)
       end
+
+      __setobj__(@settings)
     end
   end
 end
