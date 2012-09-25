@@ -143,7 +143,7 @@ module HupoWidget
       end
 
       def current_user
-        @current_user ||= Session.find.user
+        Session.find.user
       end
   end
 end
