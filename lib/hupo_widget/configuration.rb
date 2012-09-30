@@ -16,7 +16,7 @@ module HupoWidget
 
       @settings = files.inject(HashWithIndifferentAccess.new) do |settings, file|
         widget = YAML::load(ERB.new(IO.read(file)).result)
-        settings.deep_merge(widget)
+        widget ? settings.deep_merge(widget) : settings
       end
 
       __setobj__(@settings)
