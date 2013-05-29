@@ -44,7 +44,7 @@ module HupoWidget
       def instances_hash
         prefix = Hash.new {|h, k| h[k] = {}}
         # Shortcuts::AccountInfo -> %w(shortcuts account_info)
-        before_last = config_paths[0...-1].inject(prefix) {|res, key| res[key]}
+        before_last = config_paths[0...-1].inject(prefix) {|res, key| res[key] = Hash.new {|h, k| h[k] = {}}}
         # Singleton class refers straight to object
         # Other class refer to an array of instances
         before_last[config_paths.last] = singleton? ? instance : instances
